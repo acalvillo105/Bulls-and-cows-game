@@ -1,0 +1,6 @@
+com\sg\mastermind\data\MastermindInMemoryDao.class
+com\sg\mastermind\controllers\MastermindController.class
+com\sg\mastermind\models\Round.class
+com\sg\mastermind\App.class
+com\sg\mastermind\models\Game.class
+com\sg\mastermind\data\MastermindDao.class
