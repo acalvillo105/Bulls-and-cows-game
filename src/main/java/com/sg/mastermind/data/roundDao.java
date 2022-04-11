@@ -5,21 +5,19 @@
 package com.sg.mastermind.data;
 
 import com.sg.mastermind.models.Game;
+import com.sg.mastermind.models.Round;
 import java.util.List;
 
 /**
  *
  * @author acalvillo
  */
-
-//CRUD operations 
-public interface MastermindDao {
-    Game add(Game game);
-    List<Game> getAllGames();
-    Game getGameById(int gameId);
+public interface roundDao {
+    Round add(Round round, Game game);
+    List<Round> getAllRounds(int gameId);
+    Round getRoundById(int roundId);
     //true if it esists and it's updated
-    boolean updateGame(Game game);
+    boolean updateRound(Round round);
     //true if exists and it is deleted
-    boolean deleteGameById(int gameId);
-    
+    boolean deleteRoundById(int roundId);
 }

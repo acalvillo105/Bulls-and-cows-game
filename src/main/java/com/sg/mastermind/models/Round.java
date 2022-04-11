@@ -4,6 +4,8 @@
  */
 package com.sg.mastermind.models;
 
+import java.sql.Timestamp;
+
 /**
  *
  * @author acalvillo
@@ -11,7 +13,7 @@ package com.sg.mastermind.models;
 public class Round {
     private int roundId;
     private String result;
-    private String time;
+    private Timestamp time;
     private String guess;
     private int gameId;
 
@@ -31,11 +33,11 @@ public class Round {
         this.result = result;
     }
 
-    public String getTime() {
+    public Timestamp getTime() {
         return time;
     }
 
-    public void setTime(String time) {
+    public void setTime(Timestamp time) {
         this.time = time;
     }
 

@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -19,11 +19,14 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public class MastermindInMemoryDao implements MastermindDao{
-    private static final List<Game> games = new ArrayList<>();
+@Profile("memory")
+public class GameInMemoryDao implements gameDao{
+    private static final List<Game> games = new ArrayList<>();    
+    
     @Override
-    public Game add(Game game) { // ------------------- MAY NOT NEED TO PASS IN THE GAME PARAMETER, DOUBLE CHECK THIS!!! ---------------    
+    public Game add(Game game) { 
         //gives next available id value
+        
         int nextId = games.stream()
                 .mapToInt(i -> i.getGameId())
                 .max()
@@ -52,12 +55,14 @@ public class MastermindInMemoryDao implements MastermindDao{
         game.setInProgress(true); //if we start a new game, it is in progress
         game.setAnswer(answer);
         
+        games.add(game);
+        
         return game;
                         
     }
 
     @Override
-    public List<Game> getAllGames() {
+    public List<Game> getAllGames() { //----------- NEED TO CHANGE THIS TO OMMIT ANSWER IF GAME IS STILL IN PROGRESS ----------------- 
         return new ArrayList<>(games);
     }
 

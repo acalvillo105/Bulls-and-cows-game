@@ -14,7 +14,6 @@ public class Game {
     private int gameId;
     private boolean inProgress;
     private String answer;
-    private List<Round> rounds;
 
     public int getGameId() {
         return gameId;
@@ -38,14 +37,6 @@ public class Game {
 
     public void setAnswer(String answer) {
         this.answer = answer;
-    }
-
-    public List<Round> getRounds() {
-        return rounds;
-    }
-
-    public void setRounds(List<Round> rounds) {
-        this.rounds = rounds;
     }
     
 
