@@ -10,7 +10,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,27 +30,42 @@ import org.springframework.stereotype.Repository;
 @Profile("database")
 public class MastermindGameDatabaseDao implements gameDao{
     
-    private final JdbcTemplate jdbcTemplate;
-
     @Autowired
-    public MastermindGameDatabaseDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    JdbcTemplate jdbcTemplate;
+
 
     @Override
     public Game add(Game game) {
-        final String sql = "INSERT INTO game(id, inProgress, answer) VALUES(?,?,?);";
+        final String sql = "INSERT INTO game(inProgress, answer) VALUES(?,?);";
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
-
+        
+        //set answer
+        int answerLenght = 4;
+        int randomNum = 0;
+        String answer = "";
+        Random rand = new Random();
+        Map<Integer, Integer> uniqueValues = new HashMap<Integer, Integer>();
+        
+        for(int i = 0; i < answerLenght; i++){
+            do{
+                randomNum = rand.nextInt(9); //we want a random single-digit number from 0-9
+            }while(uniqueValues.containsKey(randomNum)); //will keep looping until new unique value is chosen 
+            
+            uniqueValues.put(randomNum, i);
+            answer += Integer.toString(randomNum); 
+            
+        }
+        game.setAnswer(answer);
+        game.setInProgress(true);
+        
         jdbcTemplate.update((Connection conn) -> {
 
             PreparedStatement statement = conn.prepareStatement(
                 sql, 
                 Statement.RETURN_GENERATED_KEYS);
 
-            statement.setInt(1, game.getGameId());
-            statement.setBoolean(2, game.isInProgress());
-            statement.setString(3, game.getAnswer());
+            statement.setBoolean(1, game.isInProgress());
+            statement.setString(2, game.getAnswer());
             return statement;
 
         }, keyHolder);
@@ -57,17 +76,30 @@ public class MastermindGameDatabaseDao implements gameDao{
     }
 
     @Override
-    public List<Game> getAllGames() {
-        final String sql = "SELECT id, inProgress, answer FROM game;";
-        return jdbcTemplate.query(sql, new GameMapper());
+    public List<Game> getAllGames() {      
+        
+        final String sql = "SELECT * FROM game";        
+        List<Game> gameList = jdbcTemplate.query(sql, new GameMapper());
+        
+        for (Game current: gameList){
+            if (current.isInProgress()){
+                current.setAnswer("");
+            }
+        }
+        
+        return gameList;
+        
     }
 
     @Override
     public Game getGameById(int gameId) {
+        Game currentGame;
         final String sql = "SELECT id, inProgress, answer "
-                + "FROM game WHERE id = ?;";
-
-        return jdbcTemplate.queryForObject(sql, new GameMapper(), gameId);
+                + "FROM game WHERE id = ?";
+        currentGame =  jdbcTemplate.queryForObject(sql, new GameMapper(), gameId);
+        
+        
+        return currentGame;
     }
 
     @Override

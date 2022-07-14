@@ -23,10 +23,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 
 @RestController
-//@RequestMapping("/api/game")
 public class GameController {
 
-    //private final gameDao dao;
     @Autowired
     private MastermindServiceLayerImpl service;
     
@@ -34,7 +32,6 @@ public class GameController {
     //@GetMapping
     @RequestMapping("/game") //returns list of all games
     public List<Game> all() {
-        //modify this so that it only shows the answer for those games that are done
         return service.getAllGames();
     }
     
@@ -46,7 +43,7 @@ public class GameController {
     //@PostMapping
     @RequestMapping(method = RequestMethod.POST, value = "/begin")
     @ResponseStatus(HttpStatus.CREATED)
-    public Game create(@RequestBody Game game) {
-        return service.addGame(game);
+    public int create(@RequestBody Game game) {        
+        return service.addGame(game).getGameId();
     }
 }

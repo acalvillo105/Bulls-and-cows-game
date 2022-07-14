@@ -62,7 +62,7 @@ public class GameInMemoryDao implements gameDao{
     }
 
     @Override
-    public List<Game> getAllGames() { //----------- NEED TO CHANGE THIS TO OMMIT ANSWER IF GAME IS STILL IN PROGRESS ----------------- 
+    public List<Game> getAllGames() { 
         return new ArrayList<>(games);
     }
 

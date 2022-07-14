@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -27,16 +28,48 @@ import org.springframework.stereotype.Repository;
 @Profile("database")
 public class MastermindRoundDatabaseDao implements roundDao{
     
-    private final JdbcTemplate jdbcTemplate;
-
     @Autowired
-    public MastermindRoundDatabaseDao(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    JdbcTemplate jdbcTemplate;
 
     @Override
     public Round add(Round round, Game game) {
-        final String sql = "INSERT INTO round(id, result, times, guess, gameId) VALUES(?,?,?,?,?);";
+        final String sql = "INSERT INTO round(result, times, guess, gameId) VALUES(?,?,?,?);";
+        
+        //get current time
+        Timestamp roundTime = new Timestamp(System.currentTimeMillis());
+        
+        //compute the answer 
+        String answer = game.getAnswer();
+        String guess = round.getGuess();
+        int exactMatch = 0;
+        int partialMatch = 0;
+        String epResult = "";
+        
+        
+        for(int e = 0; e < answer.length(); e++){
+            if(Character.compare(answer.charAt(e), guess.charAt(e)) == 0){
+                exactMatch++;                    
+            } 
+            for(int p = 0; p < answer.length(); p++){
+                if(e != p){
+                    if(Character.compare(answer.charAt(e), guess.charAt(p)) == 0){
+                        partialMatch++;                    
+                    } 
+                }
+            }
+        }
+        
+        if(exactMatch == 4){
+            game.setInProgress(false); 
+            final String gsql = "UPDATE game set "
+                    + "inProgress = ? WHERE id = ?";
+            jdbcTemplate.update(gsql, game.isInProgress(), game.getGameId());
+        }
+        round.setTime(roundTime);
+        epResult = "e:"+Integer.toString(exactMatch)+":p"+Integer.toString(partialMatch);
+        round.setResult(epResult);
+        
+        
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update((Connection conn) -> {
@@ -45,24 +78,23 @@ public class MastermindRoundDatabaseDao implements roundDao{
                 sql, 
                 Statement.RETURN_GENERATED_KEYS);
 
-            statement.setInt(1, round.getRoundId());
-            statement.setString(2, round.getResult());
-            statement.setTimestamp(3, round.getTime());
-            statement.setString(4, round.getGuess());
-            statement.setInt(5,game.getGameId());
+            statement.setString(1, round.getResult());
+            statement.setTimestamp(2, round.getTime());
+            statement.setString(3, round.getGuess());
+            statement.setInt(4,game.getGameId());
             return statement;
 
         }, keyHolder);
 
-        round.setGameId(keyHolder.getKey().intValue());
+        round.setRoundId(keyHolder.getKey().intValue());
 
         return round;
     }
 
     @Override
     public List<Round> getAllRounds(int gameId) {
-        final String sql = "SELECT iid, result, times, guess, gameId FROM round;";
-        return jdbcTemplate.query(sql, new RoundMapper());
+        final String sql = "SELECT * FROM round WHERE gameId = ?;";
+        return jdbcTemplate.query(sql, new RoundMapper(), gameId);
     }
 
     @Override

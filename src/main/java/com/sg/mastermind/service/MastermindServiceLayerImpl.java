@@ -30,12 +30,17 @@ public class MastermindServiceLayerImpl implements MastermindServiceLayer{
     
     @Override
     public List<Game> getAllGames(){
-        return gameDao.getAllGames(); //needs to come from database
+        return gameDao.getAllGames(); 
     }
 
     @Override
     public Game getGame(int gameId) {
-        return gameDao.getGameById(gameId);
+        Game game =  gameDao.getGameById(gameId);
+        
+        if(game.isInProgress()){
+            game.setAnswer("");
+        }
+        return game;
     }
 
     @Override
